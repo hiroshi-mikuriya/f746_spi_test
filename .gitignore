@@ -1,0 +1,12 @@
+*
+
+!*/
+!.gitignore
+!*.c
+!*.h
+!*.ioc
+!*.md
+!*.s
+!*flash.icf
+!*.ld
+
