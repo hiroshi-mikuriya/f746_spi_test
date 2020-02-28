@@ -48,8 +48,8 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_SPI_SLAVE_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uint32_t size);
-static void MX_SPI_MASTER_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uint32_t size);
+static void MX_SPI_SLAVE_Init(uint8_t const* tx, uint8_t const* rx, uint32_t size);
+static void MX_SPI_MASTER_Init(uint8_t const* tx, uint8_t const* rx, uint32_t size);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -148,10 +148,13 @@ int main(void) {
 
     /* Initialize all configured peripherals */
     LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA2);
-#define N 64
-    uint8_t tx_slave[N] = "spi slave tx buffer";
+#define N 42
+    uint8_t tx_slave[N] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+        20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41 };
     uint8_t rx_slave[N] = { 0 };
-    uint8_t tx_master[N] = "spi master tx buffer";
+    uint8_t tx_master[N] = { 0x40, 0x8b, 0x02, 0x05, 0x38, 0x90, 0x3f, 0x19, 0x51, 0x28, 0x90, 0xa8,
+        0x15, 0x18, 0x7f, 0xed, 0x7a, 0xb1, 0x47, 0x61, 0xd4, 0x76, 0x0d, 0xe3, 0xea, 0x4f, 0xd7,
+        0x57, 0x6b, 0xef, 0x27, 0x26, 0xbb, 0xf2, 0x28, 0x1b, 0x48, 0x4c, 0x98, 0x59, 0x29, 0xfb };
     uint8_t rx_master[N] = { 0 };
     MX_SPI_SLAVE_Init(tx_slave, rx_slave, N);
     MX_SPI_MASTER_Init(tx_master, rx_master, N);
@@ -180,6 +183,7 @@ int main(void) {
         ;
     while (LL_DMA_IsEnabledStream(DMA2, SPI_SLAVE_TX_STREAM))
         ;
+    LL_mDelay(1);
     LL_GPIO_SetOutputPin(GPIOE, LL_GPIO_PIN_4); // Master NSS
     LL_GPIO_SetOutputPin(LD1_GPIO_Port, LD1_Pin);
     if (matched(rx_master, tx_slave, N)) {
@@ -236,7 +240,7 @@ void SystemClock_Config(void) {
  * @param None
  * @retval None
  */
-static void MX_SPI_SLAVE_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uint32_t size) {
+static void MX_SPI_SLAVE_Init(uint8_t const* tx, uint8_t const* rx, uint32_t size) {
 
     /* USER CODE BEGIN SPI_SLAVE_Init 0 */
 
@@ -310,7 +314,7 @@ static void MX_SPI_SLAVE_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uint
     LL_DMA_SetMemorySize(DMA2, SPI_SLAVE_RX_STREAM, LL_DMA_MDATAALIGN_BYTE);
     LL_DMA_DisableFifoMode(DMA2, SPI_SLAVE_RX_STREAM);
     LL_DMA_ConfigAddresses(DMA2, SPI_SLAVE_RX_STREAM, LL_SPI_DMA_GetRegAddr(SPI_SLAVE),
-        (uint32_t)rx_buf, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+        (uint32_t)rx, LL_DMA_GetDataTransferDirection(DMA2, SPI_SLAVE_RX_STREAM));
     LL_DMA_SetDataLength(DMA2, SPI_SLAVE_RX_STREAM, size);
 
     /* SPI_SLAVE_TX Init */
@@ -323,8 +327,9 @@ static void MX_SPI_SLAVE_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uint
     LL_DMA_SetPeriphSize(DMA2, SPI_SLAVE_TX_STREAM, LL_DMA_PDATAALIGN_BYTE);
     LL_DMA_SetMemorySize(DMA2, SPI_SLAVE_TX_STREAM, LL_DMA_MDATAALIGN_BYTE);
     LL_DMA_DisableFifoMode(DMA2, SPI_SLAVE_TX_STREAM);
-    LL_DMA_ConfigAddresses(DMA2, SPI_SLAVE_TX_STREAM, (uint32_t)tx_buf,
-        LL_SPI_DMA_GetRegAddr(SPI_SLAVE), LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+    LL_DMA_ConfigAddresses(DMA2, SPI_SLAVE_TX_STREAM, (uint32_t)tx,
+        LL_SPI_DMA_GetRegAddr(SPI_SLAVE),
+        LL_DMA_GetDataTransferDirection(DMA2, SPI_SLAVE_TX_STREAM));
     LL_DMA_SetDataLength(DMA2, SPI_SLAVE_TX_STREAM, size);
 }
 
@@ -333,7 +338,7 @@ static void MX_SPI_SLAVE_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uint
  * @param None
  * @retval None
  */
-static void MX_SPI_MASTER_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uint32_t size) {
+static void MX_SPI_MASTER_Init(uint8_t const* tx, uint8_t const* rx, uint32_t size) {
     /* USER CODE BEGIN SPI_MASTER_Init 0 */
 
     /* USER CODE END SPI_MASTER_Init 0 */
@@ -402,7 +407,7 @@ static void MX_SPI_MASTER_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uin
     LL_DMA_SetMemorySize(DMA2, SPI_MASTER_RX_STREAM, LL_DMA_MDATAALIGN_BYTE);
     LL_DMA_DisableFifoMode(DMA2, SPI_MASTER_RX_STREAM);
     LL_DMA_ConfigAddresses(DMA2, SPI_MASTER_RX_STREAM, LL_SPI_DMA_GetRegAddr(SPI_MASTER),
-        (uint32_t)rx_buf, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+        (uint32_t)rx, LL_DMA_GetDataTransferDirection(DMA2, SPI_MASTER_RX_STREAM));
     LL_DMA_SetDataLength(DMA2, SPI_MASTER_RX_STREAM, size);
 
     /* SPI_MASTER_TX Init */
@@ -415,8 +420,9 @@ static void MX_SPI_MASTER_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uin
     LL_DMA_SetPeriphSize(DMA2, SPI_MASTER_TX_STREAM, LL_DMA_PDATAALIGN_BYTE);
     LL_DMA_SetMemorySize(DMA2, SPI_MASTER_TX_STREAM, LL_DMA_MDATAALIGN_BYTE);
     LL_DMA_DisableFifoMode(DMA2, SPI_MASTER_TX_STREAM);
-    LL_DMA_ConfigAddresses(DMA2, SPI_MASTER_TX_STREAM, (uint32_t)tx_buf,
-        LL_SPI_DMA_GetRegAddr(SPI_MASTER), LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+    LL_DMA_ConfigAddresses(DMA2, SPI_MASTER_TX_STREAM, (uint32_t)tx,
+        LL_SPI_DMA_GetRegAddr(SPI_MASTER),
+        LL_DMA_GetDataTransferDirection(DMA2, SPI_MASTER_TX_STREAM));
     LL_DMA_SetDataLength(DMA2, SPI_MASTER_TX_STREAM, size);
 
     SPI_Init(SPI_MASTER, LL_SPI_MODE_MASTER);
