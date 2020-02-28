@@ -2,6 +2,7 @@
 
 !*/
 !.gitignore
+!.clang-format
 !*.c
 !*.h
 !*.ioc
