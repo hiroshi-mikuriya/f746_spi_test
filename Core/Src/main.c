@@ -75,7 +75,7 @@ static void SPI_Init(SPI_TypeDef* spix, uint32_t mode) {
         .ClockPolarity = LL_SPI_POLARITY_HIGH,
         .ClockPhase = LL_SPI_PHASE_2EDGE,
         .NSS = LL_SPI_NSS_SOFT,
-        .BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV2,
+        .BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV16,
         .BitOrder = LL_SPI_MSB_FIRST,
         .CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE,
         .CRCPoly = 7,
@@ -173,10 +173,8 @@ int main(void) {
     /* USER CODE END 2 */
 
     LL_GPIO_ResetOutputPin(GPIOE, LL_GPIO_PIN_4); // Master NSS
-    LL_mDelay(1);
     LL_DMA_EnableStream(DMA2, SPI_MASTER_RX_STREAM);
     LL_DMA_EnableStream(DMA2, SPI_MASTER_TX_STREAM);
-    LL_mDelay(1);
 
     while (LL_DMA_IsEnabledStream(DMA2, SPI_MASTER_TX_STREAM))
         ;
@@ -302,44 +300,32 @@ static void MX_SPI_SLAVE_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uint
     /* SPI_SLAVE DMA Init */
 
     /* SPI_SLAVE_RX Init */
-    LL_DMA_InitTypeDef rx = {
-        .PeriphOrM2MSrcAddress = LL_SPI_DMA_GetRegAddr(SPI_SLAVE),
-        .MemoryOrM2MDstAddress = (uint32_t)rx_buf,
-        .Direction = LL_DMA_DIRECTION_PERIPH_TO_MEMORY,
-        .Mode = LL_DMA_MODE_NORMAL,
-        .PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT,
-        .MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT,
-        .PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_BYTE,
-        .MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_BYTE,
-        .NbData = size,
-        .Channel = SPI_SLAVE_RX_CHANNEL,
-        .Priority = LL_DMA_PRIORITY_VERYHIGH,
-        .FIFOMode = LL_DMA_FIFOMODE_DISABLE,
-        .FIFOThreshold = LL_DMA_FIFOTHRESHOLD_1_4,
-        .MemBurst = LL_DMA_MBURST_SINGLE,
-        .PeriphBurst = LL_DMA_PBURST_SINGLE,
-    };
-    LL_DMA_Init(DMA2, SPI_SLAVE_RX_STREAM, &rx);
+    LL_DMA_SetChannelSelection(DMA2, SPI_SLAVE_RX_STREAM, SPI_SLAVE_RX_CHANNEL);
+    LL_DMA_SetDataTransferDirection(DMA2, SPI_SLAVE_RX_STREAM, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+    LL_DMA_SetStreamPriorityLevel(DMA2, SPI_SLAVE_RX_STREAM, LL_DMA_PRIORITY_VERYHIGH);
+    LL_DMA_SetMode(DMA2, SPI_SLAVE_RX_STREAM, LL_DMA_MODE_NORMAL);
+    LL_DMA_SetPeriphIncMode(DMA2, SPI_SLAVE_RX_STREAM, LL_DMA_PERIPH_NOINCREMENT);
+    LL_DMA_SetMemoryIncMode(DMA2, SPI_SLAVE_RX_STREAM, LL_DMA_MEMORY_INCREMENT);
+    LL_DMA_SetPeriphSize(DMA2, SPI_SLAVE_RX_STREAM, LL_DMA_PDATAALIGN_BYTE);
+    LL_DMA_SetMemorySize(DMA2, SPI_SLAVE_RX_STREAM, LL_DMA_MDATAALIGN_BYTE);
+    LL_DMA_DisableFifoMode(DMA2, SPI_SLAVE_RX_STREAM);
+    LL_DMA_ConfigAddresses(DMA2, SPI_SLAVE_RX_STREAM, LL_SPI_DMA_GetRegAddr(SPI_SLAVE),
+        (uint32_t)rx_buf, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+    LL_DMA_SetDataLength(DMA2, SPI_SLAVE_RX_STREAM, size);
 
     /* SPI_SLAVE_TX Init */
-    LL_DMA_InitTypeDef tx = {
-        .PeriphOrM2MSrcAddress = (uint32_t)tx_buf,
-        .MemoryOrM2MDstAddress = LL_SPI_DMA_GetRegAddr(SPI_SLAVE),
-        .Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH,
-        .Mode = LL_DMA_MODE_NORMAL,
-        .PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT,
-        .MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT,
-        .PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_BYTE,
-        .MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_BYTE,
-        .NbData = size,
-        .Channel = SPI_SLAVE_TX_CHANNEL,
-        .Priority = LL_DMA_PRIORITY_VERYHIGH,
-        .FIFOMode = LL_DMA_FIFOMODE_DISABLE,
-        .FIFOThreshold = LL_DMA_FIFOTHRESHOLD_1_4,
-        .MemBurst = LL_DMA_MBURST_SINGLE,
-        .PeriphBurst = LL_DMA_PBURST_SINGLE,
-    };
-    LL_DMA_Init(DMA2, SPI_SLAVE_TX_STREAM, &tx);
+    LL_DMA_SetChannelSelection(DMA2, SPI_SLAVE_TX_STREAM, SPI_SLAVE_TX_CHANNEL);
+    LL_DMA_SetDataTransferDirection(DMA2, SPI_SLAVE_TX_STREAM, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+    LL_DMA_SetStreamPriorityLevel(DMA2, SPI_SLAVE_TX_STREAM, LL_DMA_PRIORITY_VERYHIGH);
+    LL_DMA_SetMode(DMA2, SPI_SLAVE_TX_STREAM, LL_DMA_MODE_NORMAL);
+    LL_DMA_SetPeriphIncMode(DMA2, SPI_SLAVE_TX_STREAM, LL_DMA_PERIPH_NOINCREMENT);
+    LL_DMA_SetMemoryIncMode(DMA2, SPI_SLAVE_TX_STREAM, LL_DMA_MEMORY_INCREMENT);
+    LL_DMA_SetPeriphSize(DMA2, SPI_SLAVE_TX_STREAM, LL_DMA_PDATAALIGN_BYTE);
+    LL_DMA_SetMemorySize(DMA2, SPI_SLAVE_TX_STREAM, LL_DMA_MDATAALIGN_BYTE);
+    LL_DMA_DisableFifoMode(DMA2, SPI_SLAVE_TX_STREAM);
+    LL_DMA_ConfigAddresses(DMA2, SPI_SLAVE_TX_STREAM, (uint32_t)tx_buf,
+        LL_SPI_DMA_GetRegAddr(SPI_SLAVE), LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+    LL_DMA_SetDataLength(DMA2, SPI_SLAVE_TX_STREAM, size);
 }
 
 /**
@@ -406,51 +392,34 @@ static void MX_SPI_MASTER_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uin
     /* SPI_MASTER DMA Init */
 
     /* SPI_MASTER_RX Init */
-    LL_DMA_InitTypeDef rx = {
-        .PeriphOrM2MSrcAddress = LL_SPI_DMA_GetRegAddr(SPI_MASTER),
-        .MemoryOrM2MDstAddress = (uint32_t)rx_buf,
-        .Direction = LL_DMA_DIRECTION_PERIPH_TO_MEMORY,
-        .Mode = LL_DMA_MODE_NORMAL,
-        .PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT,
-        .MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT,
-        .PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_BYTE,
-        .MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_BYTE,
-        .NbData = size,
-        .Channel = SPI_MASTER_RX_CHANNEL,
-        .Priority = LL_DMA_PRIORITY_VERYHIGH,
-        .FIFOMode = LL_DMA_FIFOMODE_DISABLE,
-        .FIFOThreshold = LL_DMA_FIFOTHRESHOLD_1_4,
-        .MemBurst = LL_DMA_MBURST_SINGLE,
-        .PeriphBurst = LL_DMA_PBURST_SINGLE,
-    };
-    LL_DMA_Init(DMA2, SPI_MASTER_RX_STREAM, &rx);
+    LL_DMA_SetChannelSelection(DMA2, SPI_MASTER_RX_STREAM, SPI_MASTER_RX_CHANNEL);
+    LL_DMA_SetDataTransferDirection(DMA2, SPI_MASTER_RX_STREAM, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+    LL_DMA_SetStreamPriorityLevel(DMA2, SPI_MASTER_RX_STREAM, LL_DMA_PRIORITY_VERYHIGH);
+    LL_DMA_SetMode(DMA2, SPI_MASTER_RX_STREAM, LL_DMA_MODE_NORMAL);
+    LL_DMA_SetPeriphIncMode(DMA2, SPI_MASTER_RX_STREAM, LL_DMA_PERIPH_NOINCREMENT);
+    LL_DMA_SetMemoryIncMode(DMA2, SPI_MASTER_RX_STREAM, LL_DMA_MEMORY_INCREMENT);
+    LL_DMA_SetPeriphSize(DMA2, SPI_MASTER_RX_STREAM, LL_DMA_PDATAALIGN_BYTE);
+    LL_DMA_SetMemorySize(DMA2, SPI_MASTER_RX_STREAM, LL_DMA_MDATAALIGN_BYTE);
+    LL_DMA_DisableFifoMode(DMA2, SPI_MASTER_RX_STREAM);
+    LL_DMA_ConfigAddresses(DMA2, SPI_MASTER_RX_STREAM, LL_SPI_DMA_GetRegAddr(SPI_MASTER),
+        (uint32_t)rx_buf, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+    LL_DMA_SetDataLength(DMA2, SPI_MASTER_RX_STREAM, size);
 
     /* SPI_MASTER_TX Init */
-    LL_DMA_InitTypeDef tx = {
-        .PeriphOrM2MSrcAddress = (uint32_t)tx_buf,
-        .MemoryOrM2MDstAddress = LL_SPI_DMA_GetRegAddr(SPI_MASTER),
-        .Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH,
-        .Mode = LL_DMA_MODE_NORMAL,
-        .PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT,
-        .MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT,
-        .PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_BYTE,
-        .MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_BYTE,
-        .NbData = size,
-        .Channel = SPI_MASTER_TX_CHANNEL,
-        .Priority = LL_DMA_PRIORITY_VERYHIGH,
-        .FIFOMode = LL_DMA_FIFOMODE_DISABLE,
-        .FIFOThreshold = LL_DMA_FIFOTHRESHOLD_1_4,
-        .MemBurst = LL_DMA_MBURST_SINGLE,
-        .PeriphBurst = LL_DMA_PBURST_SINGLE,
-    };
-    LL_DMA_Init(DMA2, SPI_MASTER_TX_STREAM, &tx);
+    LL_DMA_SetChannelSelection(DMA2, SPI_MASTER_TX_STREAM, SPI_MASTER_TX_CHANNEL);
+    LL_DMA_SetDataTransferDirection(DMA2, SPI_MASTER_TX_STREAM, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+    LL_DMA_SetStreamPriorityLevel(DMA2, SPI_MASTER_TX_STREAM, LL_DMA_PRIORITY_VERYHIGH);
+    LL_DMA_SetMode(DMA2, SPI_MASTER_TX_STREAM, LL_DMA_MODE_NORMAL);
+    LL_DMA_SetPeriphIncMode(DMA2, SPI_MASTER_TX_STREAM, LL_DMA_PERIPH_NOINCREMENT);
+    LL_DMA_SetMemoryIncMode(DMA2, SPI_MASTER_TX_STREAM, LL_DMA_MEMORY_INCREMENT);
+    LL_DMA_SetPeriphSize(DMA2, SPI_MASTER_TX_STREAM, LL_DMA_PDATAALIGN_BYTE);
+    LL_DMA_SetMemorySize(DMA2, SPI_MASTER_TX_STREAM, LL_DMA_MDATAALIGN_BYTE);
+    LL_DMA_DisableFifoMode(DMA2, SPI_MASTER_TX_STREAM);
+    LL_DMA_ConfigAddresses(DMA2, SPI_MASTER_TX_STREAM, (uint32_t)tx_buf,
+        LL_SPI_DMA_GetRegAddr(SPI_MASTER), LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+    LL_DMA_SetDataLength(DMA2, SPI_MASTER_TX_STREAM, size);
 
-    /* USER CODE BEGIN SPI_MASTER_Init 1 */
-
-    /* USER CODE END SPI_MASTER_Init 1 */
-    /* SPI_MASTER parameter configuration*/
     SPI_Init(SPI_MASTER, LL_SPI_MODE_MASTER);
-    /* USER CODE END SPI_MASTER_Init 2 */
 }
 
 /* USER CODE BEGIN 4 */
