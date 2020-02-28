@@ -69,16 +69,16 @@ static void MX_SPI_MASTER_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uin
 /* USER CODE BEGIN 0 */
 static void SPI_Init(SPI_TypeDef* spix, uint32_t mode) {
     LL_SPI_InitTypeDef opt = {
-        LL_SPI_FULL_DUPLEX,            // TransferDirection
-        mode,                          // Mode
-        LL_SPI_DATAWIDTH_8BIT,         // DataWidth
-        LL_SPI_POLARITY_HIGH,          // ClockPolarity
-        LL_SPI_PHASE_2EDGE,            // ClockPhase
-        LL_SPI_NSS_SOFT,               // NSS
-        LL_SPI_BAUDRATEPRESCALER_DIV2, // BaudRate
-        LL_SPI_MSB_FIRST,              // BitOrder
-        LL_SPI_CRCCALCULATION_DISABLE, // CRCCalculation
-        7,                             // CRCPoly
+        .TransferDirection = LL_SPI_FULL_DUPLEX,
+        .Mode = mode,
+        .DataWidth = LL_SPI_DATAWIDTH_8BIT,
+        .ClockPolarity = LL_SPI_POLARITY_HIGH,
+        .ClockPhase = LL_SPI_PHASE_2EDGE,
+        .NSS = LL_SPI_NSS_SOFT,
+        .BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV2,
+        .BitOrder = LL_SPI_MSB_FIRST,
+        .CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE,
+        .CRCPoly = 7,
     };
     LL_SPI_Init(spix, &opt);
     LL_SPI_SetStandard(spix, LL_SPI_PROTOCOL_MOTOROLA);
@@ -157,12 +157,12 @@ int main(void) {
     MX_SPI_MASTER_Init(tx_master, rx_master, N);
     /* USER CODE BEGIN 2 */
     LL_GPIO_InitTypeDef led = {
-        LD1_Pin,                 // Pin
-        LL_GPIO_MODE_OUTPUT,     // Mode
-        LL_GPIO_SPEED_FREQ_LOW,  // Speed
-        LL_GPIO_OUTPUT_PUSHPULL, // OutputType
-        LL_GPIO_PULL_DOWN,       // Pull
-        LL_GPIO_AF_0             // Alternate
+        .Pin = LD1_Pin,
+        .Mode = LL_GPIO_MODE_OUTPUT,
+        .Speed = LL_GPIO_SPEED_FREQ_LOW,
+        .OutputType = LL_GPIO_OUTPUT_PUSHPULL,
+        .Pull = LL_GPIO_PULL_DOWN,
+        .Alternate = LL_GPIO_AF_0,
     };
     LL_GPIO_Init(LD1_GPIO_Port, &led);
     led.Pin = LD2_Pin;
@@ -255,39 +255,43 @@ static void MX_SPI_SLAVE_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uint
      PA6   ------> SPI_SLAVE_MISO
      PB5   ------> SPI_SLAVE_MOSI
      */
-    LL_GPIO_InitTypeDef sck = { 0 };
-    sck.Pin = LL_GPIO_PIN_5;
-    sck.Mode = LL_GPIO_MODE_ALTERNATE;
-    sck.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-    sck.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    sck.Pull = LL_GPIO_PULL_NO;
-    sck.Alternate = LL_GPIO_AF_5;
+    LL_GPIO_InitTypeDef sck = {
+        .Pin = LL_GPIO_PIN_5,
+        .Mode = LL_GPIO_MODE_ALTERNATE,
+        .Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH,
+        .OutputType = LL_GPIO_OUTPUT_PUSHPULL,
+        .Pull = LL_GPIO_PULL_NO,
+        .Alternate = LL_GPIO_AF_5,
+    };
     LL_GPIO_Init(GPIOA, &sck);
 
-    LL_GPIO_InitTypeDef miso = { 0 };
-    miso.Pin = LL_GPIO_PIN_6;
-    miso.Mode = LL_GPIO_MODE_ALTERNATE;
-    miso.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-    miso.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    miso.Pull = LL_GPIO_PULL_NO;
-    miso.Alternate = LL_GPIO_AF_5;
+    LL_GPIO_InitTypeDef miso = {
+        .Pin = LL_GPIO_PIN_6,
+        .Mode = LL_GPIO_MODE_ALTERNATE,
+        .Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH,
+        .OutputType = LL_GPIO_OUTPUT_PUSHPULL,
+        .Pull = LL_GPIO_PULL_NO,
+        .Alternate = LL_GPIO_AF_5,
+    };
     LL_GPIO_Init(GPIOA, &miso);
 
-    LL_GPIO_InitTypeDef mosi = { 0 };
-    mosi.Pin = LL_GPIO_PIN_5;
-    mosi.Mode = LL_GPIO_MODE_ALTERNATE;
-    mosi.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-    mosi.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    mosi.Pull = LL_GPIO_PULL_NO;
-    mosi.Alternate = LL_GPIO_AF_5;
+    LL_GPIO_InitTypeDef mosi = {
+        .Pin = LL_GPIO_PIN_5,
+        .Mode = LL_GPIO_MODE_ALTERNATE,
+        .Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH,
+        .OutputType = LL_GPIO_OUTPUT_PUSHPULL,
+        .Pull = LL_GPIO_PULL_NO,
+        .Alternate = LL_GPIO_AF_5,
+    };
     LL_GPIO_Init(GPIOB, &mosi);
 
     /* NSS */
-    LL_EXTI_InitTypeDef nss = { 0 };
-    nss.Line_0_31 = LL_EXTI_LINE_4;
-    nss.LineCommand = ENABLE;
-    nss.Mode = LL_EXTI_MODE_IT;
-    nss.Trigger = LL_EXTI_TRIGGER_FALLING;
+    LL_EXTI_InitTypeDef nss = {
+        .Line_0_31 = LL_EXTI_LINE_4,
+        .LineCommand = ENABLE,
+        .Mode = LL_EXTI_MODE_IT,
+        .Trigger = LL_EXTI_TRIGGER_FALLING,
+    };
     LL_EXTI_Init(&nss);
     LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTA, LL_SYSCFG_EXTI_LINE4);
     LL_GPIO_SetPinPull(GPIOA, LL_GPIO_PIN_4, LL_GPIO_PULL_NO);
@@ -299,41 +303,41 @@ static void MX_SPI_SLAVE_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uint
 
     /* SPI_SLAVE_RX Init */
     LL_DMA_InitTypeDef rx = {
-        LL_SPI_DMA_GetRegAddr(SPI_SLAVE),  // PeriphOrM2MSrcAddress
-        (uint32_t)rx_buf,                  // MemoryOrM2MDstAddress
-        LL_DMA_DIRECTION_PERIPH_TO_MEMORY, // Direction
-        LL_DMA_MODE_NORMAL,                // Mode
-        LL_DMA_PERIPH_NOINCREMENT,         // PeriphOrM2MSrcIncMode
-        LL_DMA_MEMORY_INCREMENT,           // MemoryOrM2MDstIncMode
-        LL_DMA_PDATAALIGN_BYTE,            // PeriphOrM2MSrcDataSize
-        LL_DMA_MDATAALIGN_BYTE,            // MemoryOrM2MDstDataSize
-        size,                              // NbData
-        SPI_SLAVE_RX_CHANNEL,              // Channel
-        LL_DMA_PRIORITY_VERYHIGH,          // Priority
-        LL_DMA_FIFOMODE_DISABLE,           // FIFOMode
-        LL_DMA_FIFOTHRESHOLD_1_4,          // FIFOThreshold
-        LL_DMA_MBURST_SINGLE,              // MemBurst
-        LL_DMA_PBURST_SINGLE,              // PeriphBurst
+        .PeriphOrM2MSrcAddress = LL_SPI_DMA_GetRegAddr(SPI_SLAVE),
+        .MemoryOrM2MDstAddress = (uint32_t)rx_buf,
+        .Direction = LL_DMA_DIRECTION_PERIPH_TO_MEMORY,
+        .Mode = LL_DMA_MODE_NORMAL,
+        .PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT,
+        .MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT,
+        .PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_BYTE,
+        .MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_BYTE,
+        .NbData = size,
+        .Channel = SPI_SLAVE_RX_CHANNEL,
+        .Priority = LL_DMA_PRIORITY_VERYHIGH,
+        .FIFOMode = LL_DMA_FIFOMODE_DISABLE,
+        .FIFOThreshold = LL_DMA_FIFOTHRESHOLD_1_4,
+        .MemBurst = LL_DMA_MBURST_SINGLE,
+        .PeriphBurst = LL_DMA_PBURST_SINGLE,
     };
     LL_DMA_Init(DMA2, SPI_SLAVE_RX_STREAM, &rx);
 
     /* SPI_SLAVE_TX Init */
     LL_DMA_InitTypeDef tx = {
-        (uint32_t)tx_buf,                  // PeriphOrM2MSrcAddress
-        LL_SPI_DMA_GetRegAddr(SPI_SLAVE),  // MemoryOrM2MDstAddress
-        LL_DMA_DIRECTION_MEMORY_TO_PERIPH, // Direction
-        LL_DMA_MODE_NORMAL,                // Mode
-        LL_DMA_PERIPH_NOINCREMENT,         // PeriphOrM2MSrcIncMode
-        LL_DMA_MEMORY_INCREMENT,           // MemoryOrM2MDstIncMode
-        LL_DMA_PDATAALIGN_BYTE,            // PeriphOrM2MSrcDataSize
-        LL_DMA_MDATAALIGN_BYTE,            // MemoryOrM2MDstDataSize
-        size,                              // NbData
-        SPI_SLAVE_TX_CHANNEL,              // Channel
-        LL_DMA_PRIORITY_VERYHIGH,          // Priority
-        LL_DMA_FIFOMODE_DISABLE,           // FIFOMode
-        LL_DMA_FIFOTHRESHOLD_1_4,          // FIFOThreshold
-        LL_DMA_MBURST_SINGLE,              // MemBurst
-        LL_DMA_PBURST_SINGLE,              // PeriphBurst
+        .PeriphOrM2MSrcAddress = (uint32_t)tx_buf,
+        .MemoryOrM2MDstAddress = LL_SPI_DMA_GetRegAddr(SPI_SLAVE),
+        .Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH,
+        .Mode = LL_DMA_MODE_NORMAL,
+        .PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT,
+        .MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT,
+        .PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_BYTE,
+        .MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_BYTE,
+        .NbData = size,
+        .Channel = SPI_SLAVE_TX_CHANNEL,
+        .Priority = LL_DMA_PRIORITY_VERYHIGH,
+        .FIFOMode = LL_DMA_FIFOMODE_DISABLE,
+        .FIFOThreshold = LL_DMA_FIFOTHRESHOLD_1_4,
+        .MemBurst = LL_DMA_MBURST_SINGLE,
+        .PeriphBurst = LL_DMA_PBURST_SINGLE,
     };
     LL_DMA_Init(DMA2, SPI_SLAVE_TX_STREAM, &tx);
 }
@@ -358,40 +362,44 @@ static void MX_SPI_MASTER_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uin
      PE5   ------> SPI_MASTER_MISO
      PE6   ------> SPI_MASTER_MOSI
      */
-    LL_GPIO_InitTypeDef sck = { 0 };
-    sck.Pin = LL_GPIO_PIN_2;
-    sck.Mode = LL_GPIO_MODE_ALTERNATE;
-    sck.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-    sck.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    sck.Pull = LL_GPIO_PULL_NO;
-    sck.Alternate = LL_GPIO_AF_5;
+    LL_GPIO_InitTypeDef sck = {
+        .Pin = LL_GPIO_PIN_2,
+        .Mode = LL_GPIO_MODE_ALTERNATE,
+        .Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH,
+        .OutputType = LL_GPIO_OUTPUT_PUSHPULL,
+        .Pull = LL_GPIO_PULL_NO,
+        .Alternate = LL_GPIO_AF_5,
+    };
     LL_GPIO_Init(GPIOE, &sck);
 
-    LL_GPIO_InitTypeDef miso = { 0 };
-    miso.Pin = LL_GPIO_PIN_5;
-    miso.Mode = LL_GPIO_MODE_ALTERNATE;
-    miso.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-    miso.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    miso.Pull = LL_GPIO_PULL_NO;
-    miso.Alternate = LL_GPIO_AF_5;
+    LL_GPIO_InitTypeDef miso = {
+        .Pin = LL_GPIO_PIN_5,
+        .Mode = LL_GPIO_MODE_ALTERNATE,
+        .Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH,
+        .OutputType = LL_GPIO_OUTPUT_PUSHPULL,
+        .Pull = LL_GPIO_PULL_NO,
+        .Alternate = LL_GPIO_AF_5,
+    };
     LL_GPIO_Init(GPIOE, &miso);
 
-    LL_GPIO_InitTypeDef mosi = { 0 };
-    mosi.Pin = LL_GPIO_PIN_6;
-    mosi.Mode = LL_GPIO_MODE_ALTERNATE;
-    mosi.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-    mosi.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    mosi.Pull = LL_GPIO_PULL_NO;
-    mosi.Alternate = LL_GPIO_AF_5;
+    LL_GPIO_InitTypeDef mosi = {
+        .Pin = LL_GPIO_PIN_6,
+        .Mode = LL_GPIO_MODE_ALTERNATE,
+        .Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH,
+        .OutputType = LL_GPIO_OUTPUT_PUSHPULL,
+        .Pull = LL_GPIO_PULL_NO,
+        .Alternate = LL_GPIO_AF_5,
+    };
     LL_GPIO_Init(GPIOE, &mosi);
 
-    LL_GPIO_InitTypeDef nss = { 0 };
-    nss.Pin = LL_GPIO_PIN_4;
-    nss.Mode = LL_GPIO_MODE_OUTPUT;
-    nss.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-    nss.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    nss.Pull = LL_GPIO_PULL_UP;
-    nss.Alternate = LL_GPIO_AF_0;
+    LL_GPIO_InitTypeDef nss = {
+        .Pin = LL_GPIO_PIN_4,
+        .Mode = LL_GPIO_MODE_OUTPUT,
+        .Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH,
+        .OutputType = LL_GPIO_OUTPUT_PUSHPULL,
+        .Pull = LL_GPIO_PULL_UP,
+        .Alternate = LL_GPIO_AF_0,
+    };
     LL_GPIO_Init(GPIOE, &nss);
     LL_GPIO_SetOutputPin(GPIOE, LL_GPIO_PIN_4);
 
@@ -399,41 +407,41 @@ static void MX_SPI_MASTER_Init(uint8_t const* tx_buf, uint8_t const* rx_buf, uin
 
     /* SPI_MASTER_RX Init */
     LL_DMA_InitTypeDef rx = {
-        LL_SPI_DMA_GetRegAddr(SPI_MASTER), // PeriphOrM2MSrcAddress
-        (uint32_t)rx_buf,                  // MemoryOrM2MDstAddress
-        LL_DMA_DIRECTION_PERIPH_TO_MEMORY, // Direction
-        LL_DMA_MODE_NORMAL,                // Mode
-        LL_DMA_PERIPH_NOINCREMENT,         // PeriphOrM2MSrcIncMode
-        LL_DMA_MEMORY_INCREMENT,           // MemoryOrM2MDstIncMode
-        LL_DMA_PDATAALIGN_BYTE,            // PeriphOrM2MSrcDataSize
-        LL_DMA_MDATAALIGN_BYTE,            // MemoryOrM2MDstDataSize
-        size,                              // NbData
-        SPI_MASTER_RX_CHANNEL,             // Channel
-        LL_DMA_PRIORITY_VERYHIGH,          // Priority
-        LL_DMA_FIFOMODE_DISABLE,           // FIFOMode
-        LL_DMA_FIFOTHRESHOLD_1_4,          // FIFOThreshold
-        LL_DMA_MBURST_SINGLE,              // MemBurst
-        LL_DMA_PBURST_SINGLE,              // PeriphBurst
+        .PeriphOrM2MSrcAddress = LL_SPI_DMA_GetRegAddr(SPI_MASTER),
+        .MemoryOrM2MDstAddress = (uint32_t)rx_buf,
+        .Direction = LL_DMA_DIRECTION_PERIPH_TO_MEMORY,
+        .Mode = LL_DMA_MODE_NORMAL,
+        .PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT,
+        .MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT,
+        .PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_BYTE,
+        .MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_BYTE,
+        .NbData = size,
+        .Channel = SPI_MASTER_RX_CHANNEL,
+        .Priority = LL_DMA_PRIORITY_VERYHIGH,
+        .FIFOMode = LL_DMA_FIFOMODE_DISABLE,
+        .FIFOThreshold = LL_DMA_FIFOTHRESHOLD_1_4,
+        .MemBurst = LL_DMA_MBURST_SINGLE,
+        .PeriphBurst = LL_DMA_PBURST_SINGLE,
     };
     LL_DMA_Init(DMA2, SPI_MASTER_RX_STREAM, &rx);
 
     /* SPI_MASTER_TX Init */
     LL_DMA_InitTypeDef tx = {
-        (uint32_t)tx_buf,                  // PeriphOrM2MSrcAddress
-        LL_SPI_DMA_GetRegAddr(SPI_MASTER), // MemoryOrM2MDstAddress
-        LL_DMA_DIRECTION_MEMORY_TO_PERIPH, // Direction
-        LL_DMA_MODE_NORMAL,                // Mode
-        LL_DMA_PERIPH_NOINCREMENT,         // PeriphOrM2MSrcIncMode
-        LL_DMA_MEMORY_INCREMENT,           // MemoryOrM2MDstIncMode
-        LL_DMA_PDATAALIGN_BYTE,            // PeriphOrM2MSrcDataSize
-        LL_DMA_MDATAALIGN_BYTE,            // MemoryOrM2MDstDataSize
-        size,                              // NbData
-        SPI_MASTER_TX_CHANNEL,             // Channel
-        LL_DMA_PRIORITY_VERYHIGH,          // Priority
-        LL_DMA_FIFOMODE_DISABLE,           // FIFOMode
-        LL_DMA_FIFOTHRESHOLD_1_4,          // FIFOThreshold
-        LL_DMA_MBURST_SINGLE,              // MemBurst
-        LL_DMA_PBURST_SINGLE,              // PeriphBurst
+        .PeriphOrM2MSrcAddress = (uint32_t)tx_buf,
+        .MemoryOrM2MDstAddress = LL_SPI_DMA_GetRegAddr(SPI_MASTER),
+        .Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH,
+        .Mode = LL_DMA_MODE_NORMAL,
+        .PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT,
+        .MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT,
+        .PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_BYTE,
+        .MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_BYTE,
+        .NbData = size,
+        .Channel = SPI_MASTER_TX_CHANNEL,
+        .Priority = LL_DMA_PRIORITY_VERYHIGH,
+        .FIFOMode = LL_DMA_FIFOMODE_DISABLE,
+        .FIFOThreshold = LL_DMA_FIFOTHRESHOLD_1_4,
+        .MemBurst = LL_DMA_MBURST_SINGLE,
+        .PeriphBurst = LL_DMA_PBURST_SINGLE,
     };
     LL_DMA_Init(DMA2, SPI_MASTER_TX_STREAM, &tx);
 
