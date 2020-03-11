@@ -142,7 +142,6 @@ int main(void) {
 
     /* USER CODE BEGIN SysInit */
     LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
-    LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
     LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOH);
     /* USER CODE END SysInit */
 
